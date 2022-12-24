@@ -39,7 +39,7 @@ export default function ImageStayingArea({ route }): JSX.Element {
       <Button
         containerStyle={styles.button}
         title="Load image"
-        onPress={() => save(route?.params?.photo, USER.username)}
+        onPress={() => save(route?.params?.photo, USER.username.trim())}
       />
     </View>
   );

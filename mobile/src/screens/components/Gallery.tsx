@@ -43,7 +43,7 @@ export default function Gallery({
     loadQuery(
       {
         data: {
-          username: USER.username,
+          username: USER.username.trim(),
         },
       },
       { fetchPolicy: "network-only" }
@@ -130,8 +130,8 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width / 3,
     height: 150,
     backgroundColor: "rgba(255, 255, 255,0.6)",
-    borderWidth: 1,
-    borderColor: "white",
+    borderWidth: 2,
+    borderColor: "green",
   },
   image: {
     width: Dimensions.get("window").width / 3,

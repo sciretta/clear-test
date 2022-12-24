@@ -9,7 +9,7 @@ mod context;
 pub use context::Context;
 mod config;
 use config::DATABASE_URL;
-use sqlx::{postgres::PgPoolOptions, Postgres, pool::PoolConnection};
+pub use sqlx::{self, pool::PoolConnection, postgres::PgPoolOptions, Postgres};
 
 pub type Pool = sqlx::Pool<Postgres>;
 pub type PooledConnection = PoolConnection<Postgres>;

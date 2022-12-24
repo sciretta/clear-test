@@ -44,7 +44,7 @@ export default function Login(): JSX.Element {
               loginUser: { username: string; id: string };
             }) => {
               if (res?.loginUser?.username) {
-                USER.username = res.loginUser.username;
+                USER.username = res.loginUser.username.trim();
                 USER.id = res.loginUser.id;
                 navigation.navigate("Home", {
                   username: res?.loginUser?.username,
