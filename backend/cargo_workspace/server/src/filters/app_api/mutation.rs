@@ -54,4 +54,28 @@ impl Mutation {
             }
         }
     }
+
+    async fn delete_image(ctx: &Context, file_name: String) -> bool {
+        let pool = db_client::connect()
+            .await
+            .expect("Failed to connect to database.");
+
+        let query: &str = &format!("delete from images where file_name='{}'", file_name);
+
+        match db_client::sqlx::query(query).fetch_all(&pool).await {
+            Ok(_) => {
+                tokio::fs::remove_file(format!("./files/{}", file_name))
+                    .await
+                    .map_err(|e| {
+                        eprint!("error deleting file: {}", e);
+                        warp::reject::reject()
+                    });
+                true
+            }
+            Err(err) => {
+                println!("ERROR: {:?}", err);
+                false
+            }
+        }
+    }
 }

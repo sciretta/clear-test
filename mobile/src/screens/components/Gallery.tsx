@@ -4,6 +4,7 @@ import { Image } from "@rneui/themed";
 import React, { Suspense, useEffect } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   ScrollView,
@@ -11,8 +12,19 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import { PreloadedQuery, usePreloadedQuery, useQueryLoader } from "react-relay";
-import { graphql, OperationType } from "relay-runtime";
+import {
+  PreloadedQuery,
+  useMutation,
+  UseMutationConfig,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay";
+import {
+  Disposable,
+  graphql,
+  MutationParameters,
+  OperationType,
+} from "relay-runtime";
 import { USER } from "screens/Login";
 import backEnd from "utils/backEnd.json";
 
@@ -22,6 +34,12 @@ const GetUserImagesQuery = graphql`
       fileName
       ownerUsername
     }
+  }
+`;
+
+const DeleteImageMutation = graphql`
+  mutation GalleryDeleteImageMutation($fileName: String!) {
+    deleteImage(fileName: $fileName)
   }
 `;
 
@@ -38,8 +56,10 @@ export default function Gallery({
 }): JSX.Element {
   const [queryReference, loadQuery] = useQueryLoader(GetUserImagesQuery);
   const isFocused = useIsFocused();
+  const [deleteMutation, isMutationInFlight] = useMutation(DeleteImageMutation);
+
   useEffect(() => {
-    if (!isFocused) return;
+    if (!isFocused || isMutationInFlight) return;
     loadQuery(
       {
         data: {
@@ -48,7 +68,7 @@ export default function Gallery({
       },
       { fetchPolicy: "network-only" }
     );
-  }, [isFocused, loadQuery]);
+  }, [isFocused, loadQuery, isMutationInFlight]);
 
   return (
     <Suspense fallback={<Loading />}>
@@ -58,6 +78,7 @@ export default function Gallery({
             selectedImages={selectedImages}
             setSelectedImages={setSelectedImages}
             queryReference={queryReference}
+            deleteMutation={deleteMutation}
           />
         )}
       </ScrollView>
@@ -69,10 +90,12 @@ function GalleryContent({
   queryReference,
   selectedImages,
   setSelectedImages,
+  deleteMutation,
 }: {
   queryReference: PreloadedQuery<OperationType, Record<string, unknown>>;
   setSelectedImages: React.Dispatch<React.SetStateAction<Array<string>>>;
   selectedImages: Array<string>;
+  deleteMutation: (config: UseMutationConfig<MutationParameters>) => Disposable;
 }): JSX.Element {
   const data = usePreloadedQuery(GetUserImagesQuery, queryReference);
 
@@ -87,6 +110,25 @@ function GalleryContent({
       renderItem={({ item }) => (
         <TouchableOpacity
           key={item}
+          onLongPress={() =>
+            Alert.alert("Delete image", "Do you want to delete this image?", [
+              {
+                text: "No",
+                style: "cancel",
+              },
+              {
+                text: "Yes",
+                onPress: () => {
+                  deleteMutation({
+                    variables: {
+                      fileName: item.split("/")[item.split("/").length - 1],
+                    },
+                  });
+                  setSelectedImages([]);
+                },
+              },
+            ])
+          }
           onPress={() => {
             if (selectedImages.includes(item)) {
               setSelectedImages((prev) => [
