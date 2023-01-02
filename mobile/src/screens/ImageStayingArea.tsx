@@ -23,9 +23,11 @@ export default function ImageStayingArea({ route }): JSX.Element {
     fetch(`http://${backEnd.url}/upload`, {
       method: "POST",
       body: formData,
-    }).finally(() => {
-      navigation.navigate("Home");
-    });
+    })
+      .catch((err) => console.log("IMAGE LOAD ERROR", err))
+      .finally(() => {
+        navigation.navigate("Home");
+      });
   };
 
   return (

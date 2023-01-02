@@ -7,7 +7,6 @@ import {
   Alert,
   Dimensions,
   FlatList,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -72,16 +71,14 @@ export default function Gallery({
 
   return (
     <Suspense fallback={<Loading />}>
-      <ScrollView style={styles.container}>
-        {queryReference && (
-          <GalleryContent
-            selectedImages={selectedImages}
-            setSelectedImages={setSelectedImages}
-            queryReference={queryReference}
-            deleteMutation={deleteMutation}
-          />
-        )}
-      </ScrollView>
+      {queryReference && (
+        <GalleryContent
+          selectedImages={selectedImages}
+          setSelectedImages={setSelectedImages}
+          queryReference={queryReference}
+          deleteMutation={deleteMutation}
+        />
+      )}
     </Suspense>
   );
 }
@@ -103,6 +100,7 @@ function GalleryContent({
 
   return (
     <FlatList
+      style={styles.container}
       data={data.userImages.map(
         (image: { fileName: string }) =>
           `http://${backEnd.url}/files/${image.fileName}`
